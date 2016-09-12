@@ -66,14 +66,14 @@ def test( str ):
     print str,"->"
     try:
         tokens = simpleSQL.parseString( str )
-        print "tokens = ",        tokens
-        print "tokens.columns =", tokens.columns
-        print "tokens.tables =",  tokens.tables
-        print "tokens.where =", tokens.where
+        # print "tokens = ",        tokens
+        # print "tokens.columns =", tokens.columns
+        # print "tokens.tables =",  tokens.tables
+        # print "tokens.where =", tokens.where
     except ParseException, err:
         print " "*err.loc + "^\n" + err.msg
         print err
-    print
+    return tokens
 
 
 # define SQL tokens
@@ -127,13 +127,18 @@ simpleSQL.ignore( oracleSqlComment )
 def field_extract ( table, field):
     field_output = []
     for t in table_field:
-    	if t == table:
-    		for record in table_field[t]:
-    			if field in record:
-    				field_output.append(record[field])
-    print field_output
+    	if t.lower() == table.lower():
+    		if field == '*':
+    			for record in table_field[t]:
+    				field_output.append(record)
+    		else:
+	    		for record in table_field[t]:
+	    			if field in record:
+	    				field_output.append(record[field])
+    return field_output
 
-field_extract('table1','A')
+# field_extract('table1','A')
+# field_extract('table1','*')
 
 ##########################################################################
 
@@ -149,4 +154,26 @@ while True:
         break
     else:
         print "->\n"
-        print test(query)
+        # print test(query)
+        tokens = test(query)
+        #print tokens
+        ans = []
+        for column in tokens[1]:
+        	ans.append(field_extract(tokens[3][0].lower(),column))
+        	#print ans
+        # print tokens[3][0]
+        # print tokens[1][0]
+        # print field_extract(tokens[3][0].lower(), tokens[1][0].lower())
+        # print ans[0]
+        str = ''
+        for c in tokens[1]:
+        	str = str + c + ' '
+        print str
+        for i in range(len(ans[0])):
+            if len(ans) == 1:
+            	print ans[0][i]
+            else:
+            	str = ''
+                for j in range(len(ans)):
+                	str = str + ans[j][i] + '  '
+                print str
